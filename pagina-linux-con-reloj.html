@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Página Linux</title>
+    <style>
+        body {
+            font-family: 'Ubuntu', 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        nav {
+            background-color: #4b4b4b;
+            padding: 10px 0;
+        }
+        
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        nav ul li {
+            margin: 0 15px;
+        }
+        
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        nav ul li a:hover {
+            color: #f8a742;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .article {
+            flex: 1;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .clock-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-left: 20px;
+        }
+        
+        .sidebar {
+            flex: 1;
+            background-color: #fff;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .linux-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        .clock {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background-color: #1e3799;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 0, 120, 0.5);
+            border: 15px solid #0c2461;
+        }
+        
+        .clock::before {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+        }
+        
+        .hour-marks {
+            --rotation: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            transform: rotate(var(--rotation));
+        }
+        
+        .hour-marks::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: white;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff;
+        }
+        
+        .hand {
+            --rotation: 0;
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            transform: translateX(-50%) rotate(calc(var(--rotation) * 1deg));
+            z-index: 5;
+        }
+        
+        .hour {
+            width: 8px;
+            height: 80px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+        }
+        
+        .minute {
+            width: 6px;
+            height: 110px;
+            background-color: #fff;
+            border-radius: 3px;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+        }
+        
+        .second {
+            width: 2px;
+            height: 120px;
+            background-color: #f1c40f;
+            border-radius: 1px;
+            box-shadow: 0 0 5px rgba(241, 196, 15, 0.7);
+        }
+        
+        .diamonds {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+        
+        .diamond {
+            --rotation: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform: rotate(var(--rotation));
+        }
+        
+        .diamond::before {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            transform: rotate(45deg);
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5), inset 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .clock-container {
+                margin-left: 0;
+                margin-top: 20px;
+            }
+            
+            .clock {
+                width: 250px;
+                height: 250px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .clock-container, .sidebar {
+                margin-left: 0;
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mi Página Linux</h1>
+        <p>Explorando el mundo del software libre</p>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="#">Inicio</a></li>
+            <li><a href="#">Tutoriales</a></li>
+            <li><a href="#">Distribuciones</a></li>
+            <li><a href="#">Terminal</a></li>
+            <li><a href="#">Software</a></li>
+            <li><a href="#">Contacto</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <div class="main-content">
+            <div class="article">
+                <h2>Bienvenido a Mi Página Linux</h2>
+                <img src="/api/placeholder/100/100" alt="Tux: La mascota de Linux" class="linux-icon" />
+                <p>Linux es un sistema operativo de código abierto que ha revolucionado la forma en que interactuamos con las computadoras. Desde servidores web hasta dispositivos móviles, Linux ha encontrado su lugar en diversos entornos.</p>
+                
+                <h3>¿Por qué elegir Linux?</h3>
+                <p>Linux ofrece numerosas ventajas sobre otros sistemas operativos:</p>
+                <ul>
+                    <li>Es de código abierto y gratuito</li>
+                    <li>Alta seguridad y estabilidad</li>
+                    <li>Personalización avanzada</li>
+                    <li>Gran comunidad de soporte</li>
+                    <li>Funciona en hardware antiguo</li>
+                </ul>
+            </div>
+            
+            <div class="clock-container">
+                <div class="clock">
+                    <div class="diamonds">
+                        <div class="diamond" style="--rotation: 0deg"></div>
+                        <div class="diamond" style="--rotation: 30deg"></div>
+                        <div class="diamond" style="--rotation: 60deg"></div>
+                        <div class="diamond" style="--rotation: 90deg"></div>
+                        <div class="diamond" style="--rotation: 120deg"></div>
+                        <div class="diamond" style="--rotation: 150deg"></div>
+                        <div class="diamond" style="--rotation: 180deg"></div>
+                        <div class="diamond" style="--rotation: 210deg"></div>
+                        <div class="diamond" style="--rotation: 240deg"></div>
+                        <div class="diamond" style="--rotation: 270deg"></div>
+                        <div class="diamond" style="--rotation: 300deg"></div>
+                        <div class="diamond" style="--rotation: 330deg"></div>
+                    </div>
+                    <div class="hour-marks" style="--rotation: 0deg"></div>
+                    <div class="hour-marks" style="--rotation: 30deg"></div>
+                    <div class="hour-marks" style="--rotation: 60deg"></div>
+                    <div class="hour-marks" style="--rotation: 90deg"></div>
+                    <div class="hour-marks" style="--rotation: 120deg"></div>
+                    <div class="hour-marks" style="--rotation: 150deg"></div>
+                    <div class="hour-marks" style="--rotation: 180deg"></div>
+                    <div class="hour-marks" style="--rotation: 210deg"></div>
+                    <div class="hour-marks" style="--rotation: 240deg"></div>
+                    <div class="hour-marks" style="--rotation: 270deg"></div>
+                    <div class="hour-marks" style="--rotation: 300deg"></div>
+                    <div class="hour-marks" style="--rotation: 330deg"></div>
+                    <div class="hand hour" id="hour"></div>
+                    <div class="hand minute" id="minute"></div>
+                    <div class="hand second" id="second"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <h3>Distribuciones populares</h3>
+            <ul>
+                <li>Ubuntu - Fácil de usar para principiantes</li>
+                <li>Fedora - Tecnología de vanguardia</li>
+                <li>Debian - Estabilidad y fiabilidad</li>
+                <li>Arch Linux - Personalización total</li>
+                <li>Linux Mint - Interfaz familiar para usuarios de Windows</li>
+            </ul>
+            
+            <h3>Recursos útiles</h3>
+            <ul>
+                <li><a href="#">Comandos básicos de terminal</a></li>
+                <li><a href="#">Instalación de software</a></li>
+                <li><a href="#">Personalización del escritorio</a></li>
+                <li><a href="#">Seguridad en Linux</a></li>
+            </ul>
+            
+            <h3>Noticias recientes</h3>
+            <ul>
+                <li><a href="#">Nueva versión de Ubuntu lanzada</a></li>
+                <li><a href="#">Actualizaciones de kernel</a></li>
+                <li><a href="#">Mejoras en la compatibilidad de hardware</a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 Mi Página Linux - Todos los derechos reservados</p>
+        <p>Creado con amor por un entusiasta de Linux</p>
+    </footer>
+    
+    <script>
+        // Script para hacer funcionar el reloj analógico
+        const hourHand = document.getElementById('hour');
+        const minuteHand = document.getElementById('minute');
+        const secondHand = document.getElementById('second');
+        
+        function setTime() {
+            const now = new Date();
+            
+            const seconds = now.getSeconds();
+            const secondsDegrees = ((seconds / 60) * 360);
+            secondHand.style.setProperty('--rotation', secondsDegrees);
+            
+            const minutes = now.getMinutes();
+            const minutesDegrees = ((minutes / 60) * 360) + ((seconds/60)*6);
+            minuteHand.style.setProperty('--rotation', minutesDegrees);
+            
+            const hours = now.getHours();
+            const hoursDegrees = ((hours / 12) * 360) + ((minutes/60)*30);
+            hourHand.style.setProperty('--rotation', hoursDegrees);
+        }
+        
+        setInterval(setTime, 1000);
+        setTime(); // Establecer la hora inicial
+    </script>
+</body>
+</html>
