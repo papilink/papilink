@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -29,24 +30,7 @@
 
     let audioBuffer;
     let source;
-    <script src="https://w.soundcloud.com/player/api.js"></script>
 
-<div id="sc-player"></div>
-
-<script>
-    const widget = SC.Widget("sc-player");
-    
-    widget.load("https://soundcloud.com/maria-eugenia-diaz-879601496/starsony-1", {
-        show_artwork: true,
-        visual: true,
-        color: "ff5500"
-    });
-
-    // Controla la reproducción con JavaScript
-    document.addEventListener('click', () => {
-        widget.toggle();
-    });
-</script>
     // Cargar el archivo WAV
     fetch('starsony.wav')
       .then(response => {
