@@ -32,7 +32,7 @@
     let source;      // Fuente de audio
 
     // Cargar el archivo WAV (asegúrate de que esté en la misma carpeta o ajusta la ruta)
-    fetch('https://soundcloud.com/maria-eugenia-diaz-879601496/starsony-1?si=6c658f5456bf4405872615474794da3d&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing')
+    fetch('https://soundcloud.com/maria-eugenia-diaz-879601496/starsony-1?si=f21796be4c9e40338ec10be5c82d7ae2&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing')
       .then(response => response.arrayBuffer())
       .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer))
       .then(decodedData => {
