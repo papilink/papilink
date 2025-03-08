@@ -1,1 +1,109 @@
-hola mundo
+<title> Hola mundo </title>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Desarrollos web Papilink</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: rgb(0, 0, 100);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    canvas {
+      background-color: rgb(0, 0, 100);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="spectrumCanvas" width="800" height="600"></canvas>
+  <script>
+    // Configuración del contexto de audio y del analizador
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 1024; // Tamaño de la FFT
+    const bufferLength = analyser.frequencyBinCount; // Mitad del tamaño FFT
+    const dataArray = new Uint8Array(bufferLength);
+
+    let audioBuffer; // Aquí se guardará el audio cargado
+    let source;      // Fuente de audio
+
+    // Cargar el archivo WAV (asegúrate de que esté en la misma carpeta o ajusta la ruta)
+    fetch('starsony.wav')
+      .then(response => response.arrayBuffer())
+      .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer))
+      .then(decodedData => {
+        audioBuffer = decodedData;
+      })
+      .catch(e => console.error('Error al cargar el audio', e));
+
+    // Configuración del canvas para el gráfico
+    const canvas = document.getElementById('spectrumCanvas');
+    const ctx = canvas.getContext('2d');
+    const nBars = 50;              // Número de barras
+    const barHeightScale = 300 / 255; // Escala para la altura (los datos del analizador varían entre 0 y 255)
+
+    // Función para reproducir el audio
+    function playAudio() {
+      source = audioCtx.createBufferSource();
+      source.buffer = audioBuffer;
+      // Conecta la fuente al analizador y luego a la salida (destino)
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      source.start(0);
+      draw(); // Inicia la animación del gráfico
+    }
+
+    // Función para dibujar el gráfico de barras en el canvas
+    function draw() {
+      requestAnimationFrame(draw);
+      analyser.getByteFrequencyData(dataArray);
+
+      // Limpiar el canvas
+      ctx.fillStyle = 'rgb(0, 0, 100)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Calcular ancho y espacio de cada barra
+      const barFullWidth = canvas.width / nBars;
+      const barWidth = barFullWidth * 0.8;
+      const spacing = barFullWidth * 0.2;
+
+      // Dibujar las barras
+      for (let i = 0; i < nBars; i++) {
+        // Para cada barra, calcular el promedio de un conjunto de bins
+        const binSize = Math.floor(bufferLength / nBars);
+        let sum = 0;
+        for (let j = 0; j < binSize; j++) {
+          sum += dataArray[i * binSize + j];
+        }
+        const average = sum / binSize;
+        const heightBar = average * barHeightScale;
+        const x = i * barFullWidth + spacing / 2;
+        const y = canvas.height - heightBar;
+
+        // Crear un color basado en la posición para un efecto multicolor (usando HSL)
+        const hue = i / nBars * 360;
+        ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+        ctx.fillRect(x, y, barWidth, heightBar);
+      }
+    }
+
+    // Escuchar el evento de tecla (espacio) para iniciar la reproducción
+    document.addEventListener('keydown', event => {
+      if (event.code === 'Space') {
+        // Reanudar el contexto de audio si está suspendido (política de reproducción automática)
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        // Si ya se ha cargado el audio, reproducirlo
+        if (audioBuffer) {
+          playAudio();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
