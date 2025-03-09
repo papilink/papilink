@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planeta Tierra Premium by Papilink</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            perspective: 1000px;
+            position: relative;
+        }
+
+        /* Fondo de estrellas mejorado */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%),
+                linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            animation: moveStars 120s linear infinite;
+        }
+
+        @keyframes moveStars {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        /* Efecto de partículas */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: particle linear infinite;
+        }
+
+        @keyframes particle {
+            0% {
+                transform: translateY(-100vh) translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) translateX(calc(-50vw + 100%));
+                opacity: 0;
+            }
+        }
+
+        /* Planeta Tierra mejorado - Rotación inversa */
+        .earth-container {
+            width: 400px;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateEarth 30s linear infinite;
+        }
+
+        .earth {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: 
+                url('https://www.solarsystemscope.com/textures/download/8k_earth_daymap.jpg') 
+                repeat-x;
+            background-size: 200% auto;
+            box-shadow: 
+                0 0 80px rgba(65, 105, 225, 0.5),
+                inset -25px -25px 40px rgba(0, 0, 0, 0.5),
+                inset 10px 10px 40px rgba(255, 255, 255, 0.2);
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .atmosphere {
+            position: absolute;
+            width: 110%;
+            height: 110%;
+            top: -5%;
+            left: -5%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 50%, 
+                rgba(173, 216, 230, 0.1) 0%,
+                rgba(70, 130, 180, 0.05) 50%,
+                transparent 100%);
+            box-shadow: inset 0 0 50px rgba(173, 216, 230, 0.2);
+            filter: blur(20px);
+            animation: pulseAtmosphere 8s ease-in-out infinite;
+        }
+
+        @keyframes rotateEarth {
+            0% { 
+                transform: rotate(0deg) rotateX(15deg) rotateY(5deg);
+                background-position: -200% 50%;
+            }
+            100% { 
+                transform: rotate(0deg) rotatey(0deg) rotatex(0deg);
+                background-position: 0 50%;
+            }
+        }
+
+        @keyframes pulseAtmosphere {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+
+        /* Texto mejorado */
+        .text-container {
+            position: absolute;
+            bottom: 15%;
+            font-family: 'Arial', sans-serif;
+            font-size: 1.8em;
+            color: #7DF9FF;
+            text-shadow: 
+                0 0 10px #7DF9FF,
+                0 0 20px #7DF9FF,
+                0 0 30px #7DF9FF,
+                0 0 40px #0000FF;
+            animation: 
+                fadeText 3s infinite alternate,
+                floatText 6s infinite ease-in-out;
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        @keyframes fadeText {
+            from { opacity: 0.7; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1.05); }
+        }
+
+        @keyframes floatText {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Botón mejorado */
+        .play-button {
+            position: absolute;
+            bottom: 5%;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: linear-gradient(45deg, #00FFFF, #0000FF);
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 30px;
+            box-shadow: 
+                0 0 20px #00FFFF,
+                0 0 40px #0000FF;
+            transition: 
+                transform 0.3s ease,
+                box-shadow 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .play-button:hover {
+            transform: scale(1.1);
+            box-shadow: 
+                0 0 30px #00FFFF,
+                0 0 60px #0000FF;
+        }
+
+        .play-button::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00FFFF, #0000FF);
+            z-index: -1;
+            border-radius: 30px;
+            filter: blur(20px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stars"></div>
+    
+    <div class="particles" id="particles"></div>
+
+    <div class="earth-container">
+        <div class="earth"></div>
+        <div class="atmosphere"></div>
+    </div>
+
+    <div class="text-container">Desarrollos Web desde Buenos Aires Argentina para todo el mundo digital<br>en todas las plataformas</div>
+
+    <button class="play-button" onclick="playAudio()">🌀 Papilink Desarrollos Web</button>
+
+    <audio id="audio3" loop>
+        <source src="https://actions.google.com/sounds/v1/science_fiction/alien_spaceship_engine.ogg" type="audio/ogg">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+
+    <script>
+        // Generador de partículas
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for(let i = 0; i < 100; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.cssText = `
+                    left: ${Math.random() * 100}%;
+                    width: ${Math.random() * 3}px;
+                    height: ${Math.random() * 3}px;
+                    animation-duration: ${5 + Math.random() * 15}s;
+                    animation-delay: ${Math.random() * 5}s;
+                `;
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Control de audio mejorado
+        let isPlaying = false;
+        const audio = document.getElementById("audio3.txt");
+        
+        function playAudio() {
+            if(isPlaying) {
+                audio.pause();
+                isPlaying = false;
+            } else {
+                audio.play()
+                    .then(() => isPlaying = true)
+                    .catch(error => console.log("Error de audio:", error));
+            }
+        }
+
+        // Efecto de parallax
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 20;
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+            document.querySelector('.earth-container').style.transform = 
+                `rotate(${y}deg) rotateX(${x}deg)`;
+        });
+
+        // Inicialización
+        window.addEventListener('load', () => {
+            createParticles();
+            document.body.classList.add('loaded');
+        });
+    </script>
+
+</body>
+</html>
