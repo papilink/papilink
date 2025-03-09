@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desarrollos Web Papilink </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: black;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+        button {
+            background: #0044cc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0066ff;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="visualizer"></canvas>
+    <div class="controls">
+        <button onclick="playAudio()">▶️ Play</button>
+        <button onclick="pauseAudio()">⏸️ Pause</button>
+        <button onclick="stopAudio()">⏹️ Stop</button>
+    </div>
+
+    <audio id="audio"></audio>
+
+    <script>
+        let audio = document.getElementById("audio");
+        let canvas = document.getElementById("visualizer");
+        let ctx = canvas.getContext("2d");
+        let audioCtx, analyser, source;
+        
+        // Cargar el archivo audio_base64.txt y convertirlo a audio
+        fetch("audio.txt")
+            .then(response => response.text())
+            .then(base64String => {
+                let audioBlob = base64ToBlob(base64String, "audio/mp3");
+                let audioURL = URL.createObjectURL(audioBlob);
+                audio.src = audioURL;
+            })
+            .catch(error => console.error("Error cargando el archivo Base64:", error));
+
+        function base64ToBlob(base64, mimeType) {
+            let byteCharacters = atob(base64);
+            let byteArrays = [];
+            for (let i = 0; i < byteCharacters.length; i += 512) {
+                let slice = byteCharacters.slice(i, i + 512);
+                let byteNumbers = new Array(slice.length);
+                for (let j = 0; j < slice.length; j++) {
+                    byteNumbers[j] = slice.charCodeAt(j);
+                }
+                byteArrays.push(new Uint8Array(byteNumbers));
+            }
+            return new Blob(byteArrays, { type: mimeType });
+        }
+
+        function playAudio() {
+            if (!audioCtx) setupVisualizer();
+            audio.play();
+        }
+
+        function pauseAudio() {
+            audio.pause();
+        }
+
+        function stopAudio() {
+            audio.pause();
+            audio.currentTime = 0;
+        }
+
+        function setupVisualizer() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 512;
+
+            source = audioCtx.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+
+            drawVisualizer();
+        }
+
+        function drawVisualizer() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let bufferLength = analyser.frequencyBinCount;
+            let dataArray = new Uint8Array(bufferLength);
+            let barWidth = canvas.width / 20;
+
+            function renderFrame() {
+                requestAnimationFrame(renderFrame);
+                analyser.getByteFrequencyData(dataArray);
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = 0; i < 20; i++) {
+                    let value = dataArray[i * 5] / 255;
+                    let barHeight = value * canvas.height * 0.5;
+                    let blueTone = Math.floor(255 - (value * 255));
+                    let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                    
+                    gradient.addColorStop(0, `rgb(0, ${blueTone}, 255)`);
+                    gradient.addColorStop(1, `rgb(0, 0, ${blueTone})`);
+
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(i * barWidth * 1.5, canvas.height - barHeight, barWidth, barHeight);
+                }
+            }
+            renderFrame();
+        }
+    </script>
+</body>
+</html>
