@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Desarrollos Web Papilink</title>
+  <style>
+    /* Estilos para pantalla completa y fondo negro */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+    canvas {
+      display: block;
+    }
+    /* Posiciona los controles del audio en la parte superior */
+    #audio {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <!-- Reproductor de audio -->
+  <audio id="audio" controls src="astarsony.mp3"></audio>
+  
+  <!-- Canvas que cubrirá toda la pantalla -->
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const audio = document.getElementById('audio');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Función para ajustar el canvas al tamaño de la ventana
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let audioContext, analyser, source;
+
+    // Se inicializa la Web Audio API cuando se reproduce el audio
+    audio.addEventListener('play', function() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        // Para obtener 256 datos (barras) se usa un fftSize de 512
+        analyser.fftSize = 512;
+        const bufferLength = analyser.frequencyBinCount; // Será 256
+        const dataArray = new Uint8Array(bufferLength);
+
+        // Se conecta el elemento audio a la cadena de audio
+        source = audioContext.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        // Función de dibujo en el canvas
+        function draw() {
+          requestAnimationFrame(draw);
+          analyser.getByteFrequencyData(dataArray);
+
+          // Crea un efecto de desvanecimiento con un fondo semitransparente
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          const barWidth = canvas.width / bufferLength;
+          let barHeight;
+          let x = 0;
+
+          for (let i = 0; i < bufferLength; i++) {
+            // Escala la altura de la barra según el valor del audio
+            barHeight = (dataArray[i] / 255) * canvas.height;
+
+            // Se asigna un tono de azul que varía según el índice de la barra.
+            // Usamos HSL: hue fijo en 240 (azul), la saturación varía de 100% a 50%
+            const saturation = 100 - (i / bufferLength) * 50;
+            const lightness = 50;
+            ctx.fillStyle = `hsl(240, ${saturation}%, ${lightness}%)`;
+
+            // Se dibuja la barra desde la parte inferior del canvas
+            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+            x += barWidth;
+          }
+        }
+        draw();
+      }
+    });
+  </script>
+</body>
+</html>
