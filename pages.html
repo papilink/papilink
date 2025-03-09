@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-14">
+    <meta name="Desarrollos Web" content="width=device-width, initial-scale=1.0">
+    <title>Desarrollos Web Papilink</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: black;
+            overflow: hidden;
+        }
+        .photo-container {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            opacity: 0;
+            transform: scale(0.5) rotate(0deg);
+            transition: all 1.5s ease-in-out;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    // Lista de imágenes (puedes poner imágenes locales o URLs)
+    const images = [
+        "papilink1.avif",
+        "R.png",
+        "wow3.jpg",
+        "wow4.jpg",
+        "wow5.jpg",
+        "wow6.jpg",
+        "wow7.jpg",
+        "wow8.jpg",
+        "wow9.jpg",
+        "wow0.jpg",
+        "wow11.jpg",
+        "wow12.jpg",
+        "wow13.jpg",
+        "wow14.jpg",
+    ];
+
+    function createPhotoElement(src) {
+        let photo = document.createElement("div");
+        photo.classList.add("photo-container");
+        
+        let img = document.createElement("img");
+        img.src = src;
+
+        photo.appendChild(img);
+        document.body.appendChild(photo);
+
+        // Posición inicial aleatoria
+        let x = Math.random() * window.innerWidth;
+        let y = Math.random() * window.innerHeight;
+
+        photo.style.left = `${x}px`;
+        photo.style.top = `${y}px`;
+
+        // Animación de entrada
+        setTimeout(() => {
+            photo.style.opacity = 1;
+            photo.style.transform = `scale(1) rotate(${Math.random() * 360}deg)`;
+        }, 100);
+
+        // Movimiento aleatorio
+        setInterval(() => {
+            let newX = Math.random() * window.innerWidth;
+            let newY = Math.random() * window.innerHeight;
+            let rotate = Math.random() * 360;
+
+            photo.style.left = `${newX}px`;
+            photo.style.top = `${newY}px`;
+            photo.style.transform = `scale(${Math.random() * 2.5 + 1.5}) rotate(${rotate}deg)`;
+            photo.style.opacity = Math.random() * 0.5 + 0.5; // Cambia la opacidad dinámicamente
+        }, 3000);
+    }
+
+    // Cargar todas las imágenes con un delay
+    images.forEach((src, index) => {
+        setTimeout(() => createPhotoElement(src), index * 500);
+    });
+
+</script>
+
+</body>
+</html>
