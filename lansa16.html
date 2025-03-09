@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tierra Girando con Satélite</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+            perspective: 1000px;
+        }
+        
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #earth-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            transform-style: preserve-3d;
+            animation: rotate 30s linear infinite;
+        }
+        
+        #earth {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background-color: #1B3F8B;
+            box-shadow: 
+                inset 20px 0 80px 6px rgba(0, 0, 0, 0.9),
+                inset -5px 0 10px 2px rgba(255, 255, 255, 0.4),
+                0 0 100px 10px rgba(65, 120, 255, 0.3);
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+        
+        .earth-texture {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 20px,
+                rgba(30, 88, 167, 0.3) 20px,
+                rgba(30, 88, 167, 0.3) 40px
+            );
+            opacity: 0.5;
+            animation: rotate-texture 15s linear infinite;
+        }
+        
+        .continent {
+            position: absolute;
+            background-color: #2A803B;
+            border-radius: 40%;
+            box-shadow: inset 2px 2px 10px rgba(53, 161, 74, 0.7), 
+                        inset -2px -2px 10px rgba(27, 82, 38, 0.7);
+        }
+        
+        .continent1 {
+            width: 120px;
+            height: 180px;
+            top: 70px;
+            left: 60px;
+            transform: rotate(15deg);
+        }
+        
+        .continent2 {
+            width: 220px;
+            height: 100px;
+            top: 110px;
+            right: 30px;
+            transform: rotate(-10deg);
+        }
+        
+        .continent3 {
+            width: 150px;
+            height: 200px;
+            bottom: 40px;
+            left: 150px;
+            transform: rotate(5deg);
+        }
+        
+        .continent4 {
+            width: 90px;
+            height: 150px;
+            top: 40px;
+            right: 90px;
+            transform: rotate(20deg);
+        }
+        
+        .continent5 {
+            width: 70px;
+            height: 120px;
+            bottom: 100px;
+            right: 70px;
+            transform: rotate(-15deg);
+        }
+        
+        .clouds {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500"><defs><filter id="blur"><feGaussianBlur in="SourceGraphic" stdDeviation="5" /></filter></defs><g filter="url(%23blur)"><circle cx="100" cy="100" r="30" fill="white" opacity="0.7"/><circle cx="160" cy="90" r="40" fill="white" opacity="0.7"/><circle cx="220" cy="110" r="25" fill="white" opacity="0.7"/><circle cx="300" cy="140" r="35" fill="white" opacity="0.7"/><circle cx="380" cy="90" r="45" fill="white" opacity="0.7"/><circle cx="120" cy="200" r="40" fill="white" opacity="0.6"/><circle cx="200" cy="260" r="35" fill="white" opacity="0.6"/><circle cx="280" cy="220" r="30" fill="white" opacity="0.6"/><circle cx="360" cy="280" r="45" fill="white" opacity="0.6"/><circle cx="90" cy="320" r="25" fill="white" opacity="0.7"/><circle cx="180" cy="370" r="40" fill="white" opacity="0.7"/><circle cx="270" cy="340" r="30" fill="white" opacity="0.7"/><circle cx="360" cy="390" r="35" fill="white" opacity="0.7"/></g></svg>');
+            opacity: 0.8;
+            animation: cloud-move 40s linear infinite;
+        }
+        
+        @keyframes cloud-move {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        .atmosphere {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            width: 440px;
+            height: 440px;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle at 50% 50%,
+                rgba(65, 120, 255, 0) 65%,
+                rgba(65, 120, 255, 0.2) 75%,
+                rgba(65, 120, 255, 0.4) 85%,
+                rgba(65, 120, 255, 0.1) 100%
+            );
+            pointer-events: none;
+        }
+        
+        .day-night {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(
+                90deg,
+                rgba(0, 0, 0, 0.8) 50%,
+                transparent 50%
+            );
+            animation: day-night-cycle 30s linear infinite;
+        }
+        
+        @keyframes day-night-cycle {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .glow {
+            position: absolute;
+            top: -40px;
+            left: -40px;
+            width: 480px;
+            height: 480px;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle at 50% 50%,
+                rgba(65, 120, 255, 0.3) 0%,
+                rgba(65, 120, 255, 0) 70%
+            );
+            pointer-events: none;
+        }
+        
+        .pole {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: white;
+            box-shadow: inset 5px 5px 10px rgba(200, 200, 220, 0.8),
+                        inset -5px -5px 10px rgba(180, 180, 200, 0.8);
+        }
+        
+        .north-pole {
+            top: 20px;
+            left: 150px;
+        }
+        
+        .south-pole {
+            bottom: 20px;
+            right: 150px;
+        }
+        
+        .earthquake {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: #ff3300;
+            box-shadow: 0 0 10px #ff3300;
+            opacity: 0;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+        
+        @keyframes rotate-texture {
+            0% { background-position: 0 0; }
+            100% { background-position: 400px 0; }
+        }
+        
+        #satellite {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 50px;
+            margin-top: -25px;
+            margin-left: -40px;
+            transform-style: preserve-3d;
+            animation: orbit 20s linear infinite;
+        }
+        
+        #satellite-body {
+            position: absolute;
+            width: 80px;
+            height: 50px;
+            background: linear-gradient(to bottom, #e6e6e6, #cccccc, #b3b3b3);
+            border-radius: 10px;
+            transform: translateZ(250px) rotateY(180deg);
+            box-shadow: 
+                0 0 15px rgba(255, 255, 255, 0.7),
+                inset 2px 2px 5px rgba(255, 255, 255, 0.8),
+                inset -2px -2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        #satellite-details {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(to bottom, #444, #333);
+            border-radius: 5px;
+            transform: translateZ(251px) rotateY(180deg);
+        }
+        
+        #satellite-antenna {
+            position: absolute;
+            width: 6px;
+            height: 30px;
+            background: linear-gradient(to top, #b3b3b3, #808080);
+            left: 37px;
+            top: -30px;
+            transform: translateZ(250px) rotateY(180deg);
+        }
+        
+        #antenna-dish {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #d9d9d9;
+            border-radius: 50%;
+            left: 30px;
+            top: -40px;
+            transform: translateZ(250px) rotateY(180deg) rotateX(45deg);
+            box-shadow: 
+                inset 2px 2px 3px rgba(255, 255, 255, 0.8),
+                inset -2px -2px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        #satellite-wing1 {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background: linear-gradient(to right, #3366cc, #1a53ff);
+            left: -60px;
+            top: 10px;
+            transform: translateZ(250px) rotateY(180deg);
+            box-shadow: 0 0 5px #3366cc;
+        }
+        
+        #satellite-wing2 {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background: linear-gradient(to left, #3366cc, #1a53ff);
+            right: -60px;
+            top: 10px;
+            transform: translateZ(250px) rotateY(180deg);
+            box-shadow: 0 0 5px #3366cc;
+        }
+        
+        @keyframes orbit {
+            0% { transform: rotateY(0deg) rotateX(30deg) translateZ(350px); }
+            100% { transform: rotateY(360deg) rotateX(30deg) translateZ(350px); }
+        }
+        
+        #banner {
+            position: absolute;
+            min-width: 350px;
+            padding: 20px;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(20, 20, 20, 0.9));
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            color: #ffd700;
+            font-family: 'Impact', sans-serif;
+            font-size: 26px;
+            text-align: center;
+            transform: translateZ(250px) rotateY(180deg) translateY(-100px);
+            box-shadow: 
+                0 0 30px rgba(255, 215, 0, 0.7),
+                inset 0 0 15px rgba(255, 215, 0, 0.5);
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        #banner-text {
+            display: inline-block;
+            width: 100%;
+            animation: typing 3s steps(35) 1s forwards;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        #stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+        
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0;
+            z-index: -1;
+        }
+        
+        @keyframes shoot {
+            0% { 
+                transform: translate(0, 0) rotate(45deg) scale(1); 
+                opacity: 1;
+                box-shadow: 0 0 0 white;
+            }
+            70% { 
+                transform: translate(calc(var(--distance) * 1px), calc(var(--distance) * 1px)) rotate(45deg) scale(1);
+                opacity: 1;
+                box-shadow: 0 0 20px white, 0 0 40px white; 
+            }
+            100% {
+                transform: translate(calc(var(--distance) * 1.2px), calc(var(--distance) * 1.2px)) rotate(45deg) scale(0);
+                opacity: 0;
+                box-shadow: 0 0 0 white;
+            }
+        }
+        
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+        
+        #sound-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Arial', sans-serif;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        #sound-control:hover {
+            background: rgba(50, 50, 50, 0.7);
+            box-shadow: 0 0 10px #ffd700;
+        }
+        
+        #text-input {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-family: 'Arial', sans-serif;
+            z-index: 1000;
+            width: 300px;
+            max-width: 80%;
+            transition: all 0.3s ease;
+        }
+        
+        #text-input:focus {
+            outline: none;
+            box-shadow: 0 0 10px #ffd700;
+            background: rgba(20, 20, 20, 0.8);
+        }
+        
+        #update-button {
+            position: fixed;
+            bottom: 20px;
+            left: 335px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Arial', sans-serif;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        #update-button:hover {
+            background: rgba(50, 50, 50, 0.7);
+            box-shadow: 0 0 10px #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="earth-container">
+            <div id="earth">
+                <div class="day-night"></div>
+                <div class="earth-texture"></div>
+                <div class="continent continent1"></div>
+                <div class="continent continent2"></div>
+                <div class="continent continent3"></div>
+                <div class="continent continent4"></div>
+                <div class="continent continent5"></div>
+                <div class="pole north-pole"></div>
+                <div class="pole south-pole"></div>
+                <div class="clouds"></div>
+                <div class="atmosphere"></div>
+                <div class="glow"></div>
+            </div>
+        </div>
+        
+        <div id="satellite">
+            <div id="satellite-body"></div>
+            <div id="satellite-details"></div>
+            <div id="satellite-wing1"></div>
+            <div id="satellite-wing2"></div>
+            <div id="satellite-antenna"></div>
+            <div id="antenna-dish"></div>
+            <div id="banner">
+                <span id="banner-text">Mgenialive@gmail.com sms5491127213188</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="stars"></div>
+    
+    <button id="sound-control">Activar Sonido</button>
+    <input type="text" id="text-input" placeholder="Ingresa texto (máx. 35 caracteres)" maxlength="35">
+    <button id="update-button">Actualizar Cartel</button>
+    
+    <script>
+        // Crear estrellas
+        const starsContainer = document.getElementById('stars');
+        const starCount = 300;
+        
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            // Tamaño aleatorio con brillo variable
+            const size = Math.random() * 3 + 1;
+            const brightness = Math.random() * 0.5 + 0.5;
+            
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            
+            // Posición aleatoria
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            
+            // Brillo variable
+            star.style.boxShadow = `0 0 ${Math.floor(size * 2)}px rgba(255, 255, 255, ${brightness})`;
+            
+            // Animación con retraso aleatorio
+            star.style.animationDelay = Math.random() * 5 + 's';
+            star.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            
+            starsContainer.appendChild(star);
+        }
+        
+        // Crear estrellas fugaces
+        function createShootingStar() {
+            const shootingStar = document.createElement('div');
+            shootingStar.className = 'shooting-star';
+            
+            // Posición inicial aleatoria en la parte superior o izquierda de la pantalla
+            const startTop = Math.random() * 30;
+            const startLeft = Math.random() * 70;
+            
+            shootingStar.style.top = startTop + '%';
+            shootingStar.style.left = startLeft + '%';
+            
+            // Distancia aleatoria
+            const distance = Math.random() * 150 + 100;
+            shootingStar.style.setProperty('--distance', distance);
+            
+            // Animación
+            shootingStar.style.animation = `shoot ${Math.random() * 2 + 1}s linear forwards`;
+            
+            starsContainer.appendChild(shootingStar);
+            
+            // Eliminar después de la animación
+            setTimeout(() => {
+                shootingStar.remove();
+            }, 3000);
+        }
+        
+        // Crear estrellas fugaces periódicamente
+        setInterval(createShootingStar, 3000);
+        
+        // Controlar audio
+        const soundControl = document.getElementById('sound-control');
+        const audio = new Audio('/api/placeholder/400/320'); // Placeholder para el sonido
+        audio.loop = true;
+        
+        soundControl.addEventListener('click', function() {
+            if (audio.paused) {
+                audio.play();
+                soundControl.textContent = 'Desarrollos Web Papilink';
+            } else {
+                audio.pause();
+                soundControl.textContent = 'Desarrollos Web Papilink';
+            }
+        });
+        
+        // Mostrar banner después de 3 segundos
+        setTimeout(function() {
+            const banner = document.getElementById('banner');
+            banner.style.opacity = 1;
+        }, 3000);
+        
+        // Actualizar texto del banner
+        const textInput = document.getElementById('text-input');
+        const updateButton = document.getElementById('update-button');
+        const bannerText = document.getElementById('banner-text');
+        
+        updateButton.addEventListener('click', function() {
+            const text = textInput.value.trim();
+            if (text) {
+                bannerText.textContent = text;
+                // Reiniciar animación
+                bannerText.style.animation = 'none';
+                setTimeout(function() {
+                    bannerText.style.animation = 'typing 3s steps(35) forwards';
+                }, 10);
+            }
+        });
+        
+        // Crear terremotos aleatorios
+        function createEarthquake() {
+            const earth = document.getElementById('earth');
+            const earthquake = document.createElement('div');
+            earthquake.className = 'earthquake';
+            
+            // Posición aleatoria en el planeta
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 180; // Ligeramente menor que el radio del planeta
+            
+            const x = Math.cos(angle) * radius + 200;
+            const y = Math.sin(angle) * radius + 200;
+            
+            earthquake.style.left = x + 'px';
+            earthquake.style.top = y + 'px';
+            
+            // Animar la explosión
+            earthquake.style.animation = 'pulse 2s ease-out forwards';
+            
+            earth.appendChild(earthquake);
+            
+            // Eliminar después de la animación
+            setTimeout(() => {
+                earthquake.remove();
+            }, 2000);
+        }
+        
+        // Crear terremotos aleatorios
+        setInterval(createEarthquake, 5000);
+    </script>
+</body>
+</html>
