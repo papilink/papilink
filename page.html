@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventanas Web con Transiciones</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            perspective: 1000px;
+        }
+
+        .window {
+            position: absolute;
+            width: 70%;
+            height: 80%;
+            left: 15%;
+            top: 10%;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: all 1s ease-in-out;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            background: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+        }
+
+        /* Animaciones */
+        .slide-in {
+            transform: translateX(100%) rotateY(-90deg);
+        }
+
+        .slide-out {
+            transform: translateX(-100%) rotateY(90deg);
+            opacity: 0;
+        }
+
+        .active {
+            transform: translateX(0) rotateY(0deg);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Las ventanas se crearán dinámicamente con JS -->
+    </div>
+    <div class="controls">
+        <button onclick="prevWindow()">Anterior</button>
+        <button onclick="nextWindow()">Siguiente</button>
+    </div>
+
+    <script>
+        const websites = [
+            'https://www.federiconbaez.com',
+            'https://www.nasa.gov',
+            'https://www.youtube.com',
+            'https://wwwhttps://papilink.github.io/papilink',
+            'https://www.nationalgeographic.com'
+        ];
+
+        let currentIndex = 0;
+        const container = document.querySelector('.container');
+
+        // Crear todas las ventanas
+        function createWindows() {
+            websites.forEach((url, index) => {
+                const windowDiv = document.createElement('div');
+                windowDiv.classList.add('window');
+                
+                if (index === 0) {
+                    windowDiv.classList.add('active');
+                } else {
+                    windowDiv.classList.add('slide-in');
+                }
+
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+                windowDiv.appendChild(iframe);
+                container.appendChild(windowDiv);
+            });
+        }
+
+        // Obtener todas las ventanas
+        function getWindows() {
+            return document.querySelectorAll('.window');
+        }
+
+        // Siguiente ventana
+        function nextWindow() {
+            const windows = getWindows();
+            if (currentIndex < websites.length - 1) {
+                // Animar ventana actual hacia fuera
+                windows[currentIndex].classList.remove('active');
+                windows[currentIndex].classList.add('slide-out');
+                
+                currentIndex++;
+                
+                // Animar nueva ventana hacia dentro
+                windows[currentIndex].classList.remove('slide-in');
+                windows[currentIndex].classList.add('active');
+                
+                // Resetear ventanas anteriores
+                setTimeout(() => {
+                    windows[currentIndex - 1].classList.remove('slide-out');
+                    windows[currentIndex - 1].classList.add('slide-in');
+                }, 1000);
+            }
+        }
+
+        // Ventana anterior
+        function prevWindow() {
+            const windows = getWindows();
+            if (currentIndex > 0) {
+                // Animar ventana actual hacia fuera
+                windows[currentIndex].classList.remove('active');
+                windows[currentIndex].classList.add('slide-in');
+                
+                currentIndex--;
+                
+                // Animar nueva ventana hacia dentro
+                windows[currentIndex].classList.remove('slide-out');
+                windows[currentIndex].classList.add('active');
+            }
+        }
+
+        // Inicializar
+        createWindows();
+
+        // Rotación automática (opcional)
+        /*
+        setInterval(() => {
+            nextWindow();
+        }, 5000);
+        */
+    </script>
+</body>
+</html>
