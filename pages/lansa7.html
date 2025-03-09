@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efectos Visuales con Sonido</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        .text-container {
+            font-size: 40px;
+            font-weight: bold;
+            text-shadow: 0 0 15px cyan, 0 0 30px blue;
+            animation: fadeIn 2s ease-in-out, glow 1.5s infinite alternate;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 15px cyan, 0 0 30px blue; }
+            to { text-shadow: 0 0 30px cyan, 0 0 60px blue; }
+        }
+        /* Fondo con partículas animadas */
+        .background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Contenedor de texto -->
+<div class="text-container">Desarrollos de Tutoriales de corta duración y basado en el autoaprendizaje desde la web</div>
+
+<!-- Audio en Base64 -->
+<audio id="audio2" autoplay>
+    <source src="data:audio2/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAA..." type="audio2/mpeg">
+    Tu navegador no soporta audio en base64.
+</audio>
+
+<script>
+    // Reproducir el audio automáticamente
+    window.onload = function() {
+        document.getElementById("audio2").play();
+    };
+
+    // Crear fondo animado de partículas
+    const background = document.createElement("div");
+    background.classList.add("background");
+    document.body.appendChild(background);
+
+    function createParticle() {
+        let particle = document.createElement("div");
+        particle.style.position = "absolute";
+        particle.style.width = Math.random() * 10 + "px";
+        particle.style.height = particle.style.width;
+        particle.style.background = "rgba(0, 150, 255, 0.7)";
+        particle.style.borderRadius = "50%";
+        particle.style.top = Math.random() * window.innerHeight + "px";
+        particle.style.left = Math.random() * window.innerWidth + "px";
+        particle.style.opacity = Math.random();
+        particle.style.transition = "all 3s ease-in-out";
+
+        background.appendChild(particle);
+
+        setTimeout(() => {
+            particle.style.top = Math.random() * window.innerHeight + "px";
+            particle.style.left = Math.random() * window.innerWidth + "px";
+            particle.style.opacity = 0;
+        }, 100);
+
+        setTimeout(() => {
+            particle.remove();
+        }, 3000);
+    }
+
+    setInterval(createParticle, 200);
+</script>
+
+</body>
+</html>
