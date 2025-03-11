@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reproductor Audio con Playlist</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #0a0a2e;
+            color: white;
+        }
+
+        /* Menú lateral */
+        .sidebar {
+            width: 300px;
+            background: rgba(0, 0, 50, 0.9);
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+
+        /* Contenido principal */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Estilos de la lista de canciones */
+        .playlist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .playlist li {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .playlist li:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .playlist li.playing {
+            background: #1a1a6e;
+            border-left: 4px solid #00ffff;
+        }
+
+        /* Botones y controles */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #1a1a6e;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #2a2a8e;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background: #004d4d;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            border: 2px solid #1a1a6e;
+            border-radius: 5px;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div class="sidebar">
+        <h2>Playlist Papilink</h2>
+        <button class="upload-btn" onclick="document.getElementById('file-input').click()">
+            Cargar Canciones
+        </button>
+        <ul class="playlist" id="playlist"></ul>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <canvas id="visualizer" width="800" height="400"></canvas>
+        <div class="controls">
+            <button onclick="previousTrack()">⏮</button>
+            <button onclick="togglePlay()" id="playBtn">▶</button>
+            <button onclick="nextTrack()">⏭</button>
+            <button onclick="shufflePlaylist()">🔀</button>
+        </div>
+    </div>
+
+    <input type="file" id="file-input" multiple accept="audio/mp3" onchange="handleFiles(this.files)">
+    <audio id="audio-player"></audio>
+
+    <script>
+        let currentTrack = 0;
+        let playlist = [];
+        let isPlaying = false;
+        let audioContext, analyser, source, audioElement;
+        const playlistElement = document.getElementById('playlist');
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+
+        // Inicializar audio
+        function initAudio() {
+            audioElement = document.getElementById('audio-player');
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            
+            source = audioContext.createMediaElementSource(audioElement);
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+            
+            drawVisualizer();
+        }
+
+        // Manejar archivos cargados
+        function handleFiles(files) {
+            playlist = [];
+            playlistElement.innerHTML = '';
+            
+            Array.from(files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    playlist.push({
+                        name: file.name,
+                        url: e.target.result
+                    });
+                    
+                    // Crear elemento de lista
+                    const li = document.createElement('li');
+                    li.textContent = file.name;
+                    li.onclick = () => playTrack(index);
+                    playlistElement.appendChild(li);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Reproducir pista específica
+        function playTrack(index) {
+            if(index >= 0 && index < playlist.length) {
+                currentTrack = index;
+                audioElement.src = playlist[index].url;
+                audioElement.play();
+                isPlaying = true;
+                document.getElementById('playBtn').textContent = '⏸';
+                updatePlaylistStyles();
+            }
+        }
+
+        // Actualizar estilos de la playlist
+        function updatePlaylistStyles() {
+            Array.from(playlistElement.children).forEach((li, index) => {
+                li.classList.toggle('playing', index === currentTrack);
+            });
+        }
+
+        // Controles de reproducción
+        function togglePlay() {
+            if(isPlaying) {
+                audioElement.pause();
+            } else {
+                audioElement.play();
+            }
+            isPlaying = !isPlaying;
+            document.getElementById('playBtn').textContent = isPlaying ? '⏸' : '▶';
+        }
+
+        function nextTrack() {
+            currentTrack = (currentTrack + 1) % playlist.length;
+            playTrack(currentTrack);
+        }
+
+        function previousTrack() {
+            currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
+            playTrack(currentTrack);
+        }
+
+        function shufflePlaylist() {
+            playlist = playlist.sort(() => Math.random() - 0.5);
+            playlistElement.innerHTML = '';
+            playlist.forEach((track, index) => {
+                const li = document.createElement('li');
+                li.textContent = track.name;
+                li.onclick = () => playTrack(index);
+                playlistElement.appendChild(li);
+            });
+        }
+
+        // Visualizador
+        function drawVisualizer() {
+            if(!analyser) return;
+            
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Gradiente rojo-azul
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#ff0000');
+            gradient.addColorStop(0.5, '#8a2be2');
+            gradient.addColorStop(1, '#00008b');
+
+            const barWidth = (canvas.width / bufferLength) * 2.5;
+            let x = 0;
+
+            for(let i = 0; i < bufferLength; i++) {
+                const barHeight = (dataArray[i] * 1.5) + 2;
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(
+                    x,
+                    canvas.height - barHeight,
+                    barWidth,
+                    barHeight
+                );
+
+                x += barWidth + 1;
+            }
+
+            requestAnimationFrame(drawVisualizer);
+        }
+
+        // Inicializar al hacer clic
+        document.addEventListener('click', () => {
+            if(!audioContext) initAudio();
+        });
+    </script>
+</body>
+</html>
